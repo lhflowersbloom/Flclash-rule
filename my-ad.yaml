@@ -1,2 +1,22 @@
-# 你的自定义规则也可以通过镜像加速
-my_custom_ad: { <<: *ad_yaml, url: "https://hub.mirrors.2020818.xyz/https://raw.githubusercontent.com/yudong820/Flclash-rule/main/my-ad.yaml" }
+# ================================================================
+# 自定义补充拦截清单（可选，默认不启用）
+# ----------------------------------------------------------------
+# 用法：
+#   1. 把要额外拦截的域名按下面格式写进来，一行一个；
+#   2. 打开 config-rule.yaml，找到 rule-providers 里的 ads-custom，
+#      取消那一行的注释；
+#   3. 再在 rules 的广告拦截段里取消这一行的注释：
+#      - RULE-SET,ads-custom,🛡️ 广告拦截
+#   4. 保存 → 下拉刷新订阅 → 生效。
+#
+# 说明：
+#   - 只写域名后缀（example.com 会连子域名一起拦截）；
+#   - 不要写 http://、不要带路径、不要写通配符 *；
+#   - 改完记得在 FlClash 里"更新规则集"或重新激活配置。
+# ================================================================
+
+payload:
+  # 示例（占位用，可整行删除）：
+  # - "ads.example.com"
+  # - "tracker.example.net"
+  - "ad.doubleclick.net"
