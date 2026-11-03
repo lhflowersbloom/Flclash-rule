@@ -150,15 +150,17 @@ https://fastly.jsdelivr.net/gh/lhflowersbloom/Flclash-rule@main/config-rule.yaml
 | `🚀 节点选择` | 手动 | `⚡ 自动选择` | 全局出口 |
 | `⚡ 自动选择` | 自动测速 | — | 全部节点中择优，懒测速省电 |
 | `🛡️ 广告拦截` | 手动 | `REJECT` | 拦截总开关 |
-| `🤖 AI 服务` | 手动 | 美国 | ChatGPT / Claude / Gemini 等 |
-| `📺 国际流媒体` | 手动 | 香港 | YouTube / Netflix / Spotify |
-| `🍀 Google` | 手动 | 香港 | 搜索、Play 服务、登录链路 |
-| `📲 Telegram` | 手动 | 新加坡 | — |
-| `🎵 TikTok` | 手动 | 美国 | 建议 US / SG 节点 |
+| `🤖 AI 服务` | 手动 | `🚀 节点选择` | ChatGPT / Claude / Gemini 等，可手动指定美国 |
+| `📺 国际流媒体` | 手动 | `🚀 节点选择` | YouTube / Netflix / Spotify，可手动指定香港 |
+| `🍀 Google` | 手动 | `🚀 节点选择` | 搜索、Play 服务、登录链路 |
+| `📲 Telegram` | 手动 | `🚀 节点选择` | 想固定地区时手动选香港 / 新加坡 |
+| `🎵 TikTok` | 手动 | `🚀 节点选择` | 需手动切到 US / SG 节点 |
 | `Ⓜ️ 微软服务` | 手动 | 直连 | 微软、OneDrive、Xbox |
 | `🐟 漏网之鱼` | 手动 | 节点选择 | 未命中任何规则的流量 |
 | `🇭🇰 🇯🇵 🇸🇬 🇺🇸` 节点池 | 手动 | 自动归类 | 按节点名关键词自动分组 |
 
+> **服务组默认都指向 `🚀 节点选择`**，而不是某个地区组。原因是：机场如果没有该地区节点，地区组会是空的，指向它的服务就会直接断掉。需要固定地区时手动切一下即可。
+>
 > 地区分组依赖**节点名称关键词**（香港 / HK、日本 / JP、新加坡 / SG、美国 / US…）。
 > 机场命名不含这些词时，节点进不了对应分组 —— 按[自定义](#自定义)改成你的关键词即可。
 
@@ -246,9 +248,12 @@ payload:
 | `find-process-mode: "off"` | 手机端按进程匹配收益有限，却要常驻扫描，关掉更省电 |
 | `lazy: true` 懒测速 | 只有真正用到某个组时才测速，避免后台反复打点 |
 | `interval: 86400` | 规则集每天更新一次足够，减少启动与切换时的等待 |
+| 规则集下载 `proxy: DIRECT` | 下载不依赖节点：节点全挂时规则集仍能更新，不会连带规则失效 |
 | 只保留必要策略组 | 组越少，启动越快，切换越省内存 |
 
 > 想进一步减负：把 `ads-anti` 换成更小的源，或在 `rules` 里注释掉 `ads-awa` / `ads-meta`。
+>
+> 若你的网络访问不了 jsDelivr 直连，把 `rule-anchor` 里的 `proxy: DIRECT` 改成 `proxy: 🚀 节点选择`。
 
 ---
 
@@ -271,11 +276,24 @@ payload:
 
 ## 常见问题
 
+**Q：某个服务连不上，但别的服务正常（比如 Telegram 不通、Play 商店正常）？**
+A：这是"服务组指向了空的地区组"的典型表现。早期版本把 `📲 Telegram` 默认指向 `🇸🇬 新加坡节点`，如果机场没有新加坡节点，那个组就是空的，选中它等于直连，于是只有 Telegram 断掉。现在所有服务组默认指向 `🚀 节点选择` 已修掉这个问题。若你用的是旧文件，手动把该组切成 `🚀 节点选择` 即可。
+
+**Q：怎么确认到底是哪一步出问题？**
+A：看日志，按下面顺序对号：
+
+```text
+dial 📲 Telegram (match RuleSet/telegram-domain)  ... refused / timeout   → 规则命中没问题，是这个组的节点不可用
+dial 🐟 漏网之鱼 (match Match/)  --> t.me                                 → 规则没命中，多半是规则集没下载成功
+proxy not found                                                          → 规则指向的策略组名字写错了
+DNS failed / context deadline exceeded                                   → 节点或 DNS 有问题，与规则无关
+```
+
 **Q：导入后节点是空的？**
 A：订阅没改成自己的链接，或者订阅不是 Clash 格式。改 `Airport1.url` 后重新「更新订阅」。
 
 **Q：规则集一直更新失败？**
-A：全部规则集走 `fastly.jsdelivr.net`，国内一般可直连。若所在网络访问不了，把 URL 里的 `fastly.jsdelivr.net` 换成 `cdn.jsdelivr.net`；仍失败就先开代理再重试。
+A：全部规则集走 `fastly.jsdelivr.net`，国内一般可直连。若所在网络访问不了，把 URL 里的 `fastly.jsdelivr.net` 换成 `cdn.jsdelivr.net`；仍失败就把 `rule-anchor` 里的 `proxy: DIRECT` 改成 `proxy: 🚀 节点选择`，让规则集走代理下载。
 
 **Q：广告还在？**
 A：依次确认三件事：① `🛡️ 广告拦截` 是 `REJECT`；② 规则集已成功更新；③ 该 App 的广告是否走 IP 硬编码或自带 DoH —— 这类 DNS 层拦不住，任何 Clash 配置都一样。看日志能确认域名有没有命中。

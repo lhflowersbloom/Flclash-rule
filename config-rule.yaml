@@ -152,45 +152,45 @@ proxy-groups:
   - name: 🤖 AI 服务
     type: select
     proxies:
+      - 🚀 节点选择
       - 🇺🇸 美国节点
       - 🇯🇵 日本节点
       - 🇸🇬 新加坡节点
-      - 🚀 节点选择
       - ⚡ 自动选择
 
   - name: 📺 国际流媒体
     type: select
     proxies:
+      - 🚀 节点选择
       - 🇭🇰 香港节点
       - 🇯🇵 日本节点
       - 🇸🇬 新加坡节点
       - 🇺🇸 美国节点
-      - 🚀 节点选择
 
   - name: 🍀 Google
     type: select
     proxies:
+      - 🚀 节点选择
       - 🇭🇰 香港节点
       - 🇯🇵 日本节点
       - 🇸🇬 新加坡节点
       - 🇺🇸 美国节点
-      - 🚀 节点选择
 
   - name: 📲 Telegram
     type: select
     proxies:
-      - 🇸🇬 新加坡节点
-      - 🇭🇰 香港节点
-      - 🇯🇵 日本节点
       - 🚀 节点选择
+      - 🇭🇰 香港节点
+      - 🇸🇬 新加坡节点
+      - 🇯🇵 日本节点
 
   - name: 🎵 TikTok
     type: select
     proxies:
+      - 🚀 节点选择
       - 🇺🇸 美国节点
       - 🇸🇬 新加坡节点
       - 🇯🇵 日本节点
-      - 🚀 节点选择
 
   - name: Ⓜ️ 微软服务
     type: select
@@ -287,8 +287,8 @@ rules:
 # 全部使用 mrs 二进制格式（behavior: domain / ipcidr）
 # 相比 yaml / text 规则集，冷启动更快、内存占用更低，手机端更省电
 rule-anchor:
-  domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}
-  ipcidr: &ipcidr {type: http, interval: 86400, behavior: ipcidr, format: mrs}
+  domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs, proxy: DIRECT}
+  ipcidr: &ipcidr {type: http, interval: 86400, behavior: ipcidr, format: mrs, proxy: DIRECT}
 
 rule-providers:
   # ---- 广告 ----
