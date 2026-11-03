@@ -47,9 +47,19 @@ proxy-providers:
 
 ### 2. 导入 FlClash
 
+**方式 A（推荐）：导入文件**
+
 - 手机把 `config-rule.yaml` 下载到本地；
 - FlClash → **配置** → 右下角 **+** → **导入文件** → 选择该文件；
 - 导入后点一下这张配置卡，使其**激活**。
+
+**方式 B：用链接导入**
+
+```text
+https://fastly.jsdelivr.net/gh/lhflowersbloom/Flclash-rule@main/config-rule.yaml
+```
+
+好处是以后仓库更新能同步到手机；代价是订阅链接要在 FlClash 里重新编辑一次，且每次同步后可能被覆盖。**只在自己会改配置的情况下用这个方式。**
 
 ### 3. 更新规则集（首次必须做）
 
