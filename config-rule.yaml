@@ -258,6 +258,7 @@ rules:
   - RULE-SET,ads-anti,🛡️ 广告拦截      # anti-AD：中文站点 / 国内 App 广告主力
   - RULE-SET,ads-awa,🛡️ 广告拦截       # AWAvenue：App 开屏、信息流广告补充
   - RULE-SET,ads-meta,🛡️ 广告拦截      # Mihomo 官方 geosite 广告分类
+  - RULE-SET,ads-app,🛡️ 广告拦截       # 国内 App 内广告（ACL4SSR 应用净化，含开屏/激励视频 SDK）
 
   # ---- 3. 服务分流 ----
   - RULE-SET,ai-domain,🤖 AI 服务
@@ -295,6 +296,8 @@ rule-providers:
   ads-anti: {<<: *domain, url: "https://fastly.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/ads.mrs", path: ./ruleset/ads-anti.mrs}
   ads-awa: {<<: *domain, url: "https://fastly.jsdelivr.net/gh/TG-Twilight/AWAvenue-Ads-Rule@main/Filters/AWAvenue-Ads-Rule-Clash.mrs", path: ./ruleset/ads-awa.mrs}
   ads-meta: {<<: *domain, url: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/category-ads-all.mrs", path: ./ruleset/ads-meta.mrs}
+  # 国内 App 内广告：ACL4SSR「应用净化」清单（classical 文本），补充 mrs 集合没覆盖的 App SDK
+  ads-app: {type: http, interval: 86400, behavior: classical, format: text, proxy: DIRECT, url: "https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/BanProgramAD.list", path: ./ruleset/ads-app.list}
   # 自定义补充清单（可选）：把自己的域名写进 my-ad.yaml 后，取消下面这行和 rules 里对应规则的注释
   # ads-custom: {<<: *domain, format: yaml, url: "https://fastly.jsdelivr.net/gh/lhflowersbloom/Flclash-rule@main/my-ad.yaml", path: ./ruleset/ads-custom.yaml}
 

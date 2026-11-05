@@ -119,14 +119,36 @@ https://fastly.jsdelivr.net/gh/lhflowersbloom/Flclash-rule@main/config-rule.yaml
 | `ads-anti` | [anti-AD](https://github.com/privacy-protection-tools/anti-AD)（DustinWin 的 mrs 镜像） | **中文站点 / 国内 App 广告**（主力） | 约 10.6 万 |
 | `ads-awa` | [AWAvenue-Ads-Rule](https://github.com/TG-Twilight/AWAvenue-Ads-Rule) | App 开屏、信息流、广告 SDK 补充 | 约 970 |
 | `ads-meta` | [MetaCubeX geosite](https://github.com/MetaCubeX/meta-rules-dat) `category-ads-all` | 国际广告 / 追踪域名兜底 | 约 900 |
+| `ads-app` | [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR) `BanProgramAD`（应用净化） | 国内 App 内广告：开屏、激励视频、广点通素材 | 约 1000 |
 
 实测命中记录（Mihomo 日志）：
 
 ```text
 --> mi.gdt.qq.com:443                 match RuleSet(ads-anti) using 🛡️ 广告拦截[REJECT]   # 广点通
 --> pagead2.googlesyndication.com:443 match RuleSet(ads-anti) using 🛡️ 广告拦截[REJECT]   # Google 广告
+--> pgdt.gtimg.com:443                match RuleSet(ads-app)  using 🛡️ 广告拦截[REJECT]   # 广点通素材
 --> res.wx.qq.com:443                 match DomainSuffix(res.wx.qq.com) using DIRECT      # 微信资源未被误杀
 ```
+
+### App 内广告为什么拦不干净
+
+层配置只能按**域名**拦，而国内很多 App 的广告是和内容共用一个接口下发的，域名层无法区分。以酷安为例，实测过的事实：
+
+```text
+ad.coolapk.com / ads.coolapk.com / open.coolapk.com / adservice.coolapk.com  → 全部 NXDOMAIN（不存在）
+api.coolapk.com / static.coolapk.com                                        → CNAME 到 eo.dnse0.com（腾讯云 EdgeOne）
+```
+
+也就是说酷安**没有独立的广告域名**，开屏与信息流广告都由 `api.coolapk.com` 返回。拦掉这个域名，App 就废了；不拦，广告就还在。
+
+这套配置能做的是把**外采广告**清掉：
+
+| 能拦 | 拦不住 |
+|---|---|
+| 第三方广告 SDK 的请求与素材（广点通、穿山甲、汇量、百度联盟…） | App 自家 API 下发的开屏 / 信息流广告 |
+| 广告素材 CDN（`pgdt.gtimg.com` 等）→ 广告位变空白 | 硬编码 IP、自带 DoH 的广告请求 |
+
+想把自家 API 的广告也清掉，只能做 HTTPS 中间人并改写响应体，这需要 **Surge / Stash / Quantumult X** 这类支持 MITM 脚本的客户端；Clash / Mihomo 内核没有这个能力。另一条路是用 GKD 一类自动点击跳过工具，或在酷安里开会员。
 
 ---
 
@@ -275,6 +297,9 @@ payload:
 ---
 
 ## 常见问题
+
+**Q：酷安 / B站 这类 App 里还能看到广告？**
+A：先用日志确认广告请求的域名。如果是 `pgdt.gtimg.com`、`pangolin*.com` 这类第三方 SDK，应该已经被拦；还看得到的基本都是 App 自家 API（如 `api.coolapk.com`）下发的开屏与信息流广告，域名层拦不住 —— 详见[App 内广告为什么拦不干净](#app-内广告为什么拦不干净)。
 
 **Q：某个服务连不上，但别的服务正常（比如 Telegram 不通、Play 商店正常）？**
 A：这是"服务组指向了空的地区组"的典型表现。早期版本把 `📲 Telegram` 默认指向 `🇸🇬 新加坡节点`，如果机场没有新加坡节点，那个组就是空的，选中它等于直连，于是只有 Telegram 断掉。现在所有服务组默认指向 `🚀 节点选择` 已修掉这个问题。若你用的是旧文件，手动把该组切成 `🚀 节点选择` 即可。
